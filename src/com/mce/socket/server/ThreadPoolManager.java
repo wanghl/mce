@@ -10,7 +10,7 @@ public class ThreadPoolManager {
 	{
 		if ( excutor  == null )
 		{
-			excutor = new OrderedThreadPoolExecutor(6,30) ;
+			excutor = new OrderedThreadPoolExecutor(100,300) ;
 			return excutor ;
 		}
 		else

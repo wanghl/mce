@@ -132,6 +132,12 @@ public class SystemConfiguration {
 			log.error("严重错误！MCE服务程序初始化失败！" + e.getMessage()) ;
 			Map map = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.MESSAGE_ERROR_CODE, e.getMessage(), "MCE服务初始化失败", null) ;
 			db.saveErrorLog(map);
+			try {
+				throw e ;
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		finally
 		{
@@ -139,7 +145,6 @@ public class SystemConfiguration {
 			{
 				conn.close() ;
 			}
-			log.info("系统初始化完成!");
 		}
 		
 	}

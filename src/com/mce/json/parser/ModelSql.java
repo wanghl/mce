@@ -121,6 +121,11 @@ public class ModelSql {
 		
 	}
 	
+	public static String updateAllPositionStatus(String status)
+	{
+		return "update env_position set positionstate = " + status ;
+	}
+	
 	public static String getParmeterbyDeviceuidSql(String  devicename ,String deviceuid)
 	{
 		return "select * from device" + devicename + "_p where deviceuid='" + deviceuid + "'";
