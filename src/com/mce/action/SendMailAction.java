@@ -15,7 +15,7 @@ import javax.mail.internet.MimeMultipart;
 
 public class SendMailAction {
 	
-	public static void sendMail(String receiver ,String content)
+	public static void sendMail(String receiver ,String title ,String content)
 	{
 		 	Properties props = new Properties();
 	        Session sendsession;
@@ -39,7 +39,7 @@ public class SendMailAction {
 	            InternetAddress[] toEmail = new InternetAddress().parse(receiver);
 	            message.setRecipients(Message.RecipientType.TO,toEmail);
 	            
-	            message.setSubject("MCE 设备运行日志")  ;
+	            message.setSubject(title)  ;
 	            message.setSentDate(new Date()) ;
 	            
 	            message.setText(content) ;
@@ -73,7 +73,7 @@ public class SendMailAction {
 	public static void main(String[] argvs)
 	{
 	       String content = "lalalalallall";
-		SendMailAction.sendMail("xbwolf@sina.cn,wanghongliang@zephyr.com.cn", content);
+		//SendMailAction.sendMail("xbwolf@sina.cn,wanghongliang@zephyr.com.cn", content);
 	}
 
 }

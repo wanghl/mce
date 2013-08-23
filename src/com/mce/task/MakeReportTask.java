@@ -231,9 +231,10 @@ public class MakeReportTask implements Job {
 			{
 				sb.append(receiver.get("email").toString() + " ,") ;
 			}
-			
+			String title = "MCE " + MCEUtil.getCurrentDate() + " 运行日志。服务器名称：" + SystemConfiguration.getProperty("servername") + " 未连接"
+				+ unruncount + "台 ，有告警" + alarmcount + "台，正常运行" + successcount + "台" ;
 			//sned it 
-			SendMailAction.sendMail(sb.toString() , mailContent) ;
+			SendMailAction.sendMail(sb.toString() , title ,mailContent) ;
 		}
 	}
 

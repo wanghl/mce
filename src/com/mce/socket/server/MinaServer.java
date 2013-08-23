@@ -48,7 +48,7 @@ public class MinaServer extends HttpServlet {
 			SystemConfiguration cfg = new SystemConfiguration();
 			cfg.initialization();
 			//打开网络监听前将所有设备的状态职位断开 
-			db.executeSaveOrUpdate(ModelSql.updateAllPositionStatus("6"), null) ;
+			db.executeSaveOrUpdate(ModelSql.updateAllPositionStatus("3"), null) ;
 			log.info("系统初始化完成！ ") ;
 			IoAcceptor acceptor = new NioSocketAcceptor();
 			acceptor.getFilterChain().addLast("controler", new MCEControlerFilter());
