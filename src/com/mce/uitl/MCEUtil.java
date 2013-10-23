@@ -42,6 +42,11 @@ public class MCEUtil {
 		
 		return sdf.format(new Date());
 	}
+	public static String getCurrentDateAll() {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+		
+		return sdf.format(new Date());
+	}
 	
 	public static String getBeforeDate (String dateValue )
 	{
@@ -64,6 +69,7 @@ public class MCEUtil {
 		Calendar c = Calendar.getInstance(); 
 		c.setTime(date) ;
 		int day=c.get(Calendar.DATE); 
+		
 		c.set(Calendar.DATE,day-1); 
 		String dayBefore=new SimpleDateFormat("yyyy-MM-dd").format(c.getTime()); 
 		return dayBefore ;
@@ -121,6 +127,13 @@ public class MCEUtil {
 		return days + "天" + hours + "小时" + minutes + "分钟" + seconds + "秒";
 
 	}
+	
+	
+	public static Long getUTCString() throws ParseException
+	{
+		return  new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(MCEUtil.getCurrentDateAll()).getTime();
+
+	}
 
 	public static  String createHtml(Map data) {
 		StringWriter sw = new StringWriter();
@@ -141,9 +154,8 @@ public class MCEUtil {
 	}
 	
 	
-	public static void main(String[] argvs)
+	public static void main(String[] argvs) throws ParseException
 	{
-		Date d = new Date() ;
-		System.out.println(d.getTime()) ;
+		System.out.println(getUTCString()) ;
 	}
 }

@@ -296,15 +296,6 @@ public class MCECommandAction implements IMCECommandAction{
 		return value ;
 	}
 	
-	public static void main(String[] argvs)
-	{
-		Timestamp source = new Timestamp( new Long(1373598070) * 1000) ;
-		
-		System.out.println(source) ; 
-	}
-	
-	
-	
 	
 
 }

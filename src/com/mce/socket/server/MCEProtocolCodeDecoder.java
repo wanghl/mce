@@ -11,6 +11,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MCEUtil;
 
 public class MCEProtocolCodeDecoder extends CumulativeProtocolDecoder {
@@ -69,6 +70,10 @@ public class MCEProtocolCodeDecoder extends CumulativeProtocolDecoder {
 				return false ;
 			}
 			
+		}
+		if ( tmpstr.contains("901.1.103"))
+		{
+			iosession.setAttribute("status" ,MCEStatus.READ_STATUS) ;
 		}
 		protocoldecoderoutput.write(tmpstr);
 		if(log.isDebugEnabled())

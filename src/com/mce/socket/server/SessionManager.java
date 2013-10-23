@@ -19,6 +19,7 @@ import org.apache.mina.core.service.IoAcceptor;
 import org.apache.mina.core.session.IoSession;
 
 import com.alibaba.fastjson.JSON;
+import com.mce.action.SystemConfiguration;
 import com.mce.db.operate.DatabaseOperator;
 import com.mce.json.parser.ModelSql;
 import com.mce.uitl.MCECommand;
@@ -112,7 +113,8 @@ public class SessionManager {
 	
 		for(Entry<Long,IoSession> entry : sessionMap.entrySet())
 		{
-			if(entry.getValue().isConnected() && entry.getValue().getAttribute("status").toString().equals(MCEStatus.READ_STATUS))
+			
+			if( entry.getValue().getAttribute("status").toString().equals("") || (entry.getValue().isConnected() && entry.getValue().getAttribute("status").toString().equals(MCEStatus.READ_STATUS)) )
 			{
 				
 				entry.getValue().write(QUERY_STATUS) ;
@@ -143,9 +145,17 @@ public class SessionManager {
 					log.info("session信息: " + entry.getValue()) ;
 					log.info("原因: 上一状态查询指令未收到返回报文") ;
 				}
-				log.info("设备控制命令发送失败，准备断开连接 ") ;
-				entry.getValue().setAttribute("event_type",MCEStatus.SERVER_SIDE_CLOSE) ;
-				entry.getValue().close(true) ;
+				if ( SystemConfiguration.getProperty("closemode").equals("0"))
+				{
+					log.info("设备控制命令发送失败，准备断开连接 ") ;
+					entry.getValue().setAttribute("event_type",MCEStatus.SERVER_SIDE_CLOSE) ;
+					entry.getValue().close(true) ;
+					
+				}
+				else
+				{
+					log.info("放弃发送103查询报文， 等待MCE返回结果") ;
+				}
 			}
 		}
 	}

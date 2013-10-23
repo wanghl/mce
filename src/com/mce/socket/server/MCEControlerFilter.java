@@ -32,7 +32,7 @@ public class MCEControlerFilter extends IoFilterAdapter {
 	public void messageReceived(NextFilter nextFilter, IoSession session, Object message) throws Exception {
 		
 		
-		session.setAttribute("status" ,MCEStatus.READ_STATUS) ;
+		
 		if(log.isDebugEnabled())
 		{
 			log.debug("=========收到设备报文，日志输出开始=========") ;
@@ -59,18 +59,18 @@ public class MCEControlerFilter extends IoFilterAdapter {
 		log.warn("客户端 【" + session + " 】" + " 连接关闭！" ) ;
 		String deviceuid = (String) session.getAttribute("deviceuid") ;
 	
-		if(! SessionManager.isDeviceConnected(deviceuid))
-		{
+		//if(! SessionManager.isDeviceConnected(deviceuid))
+		//{
 			log.info("更改MCE连接状态为断开 。序列号： " + deviceuid) ;
 			//db.executeSaveOrUpdate(ModelSql.updatePositionStatus(), new Object[]{MCEStatus.CONNECTION_CLOSED ,deviceuid}) ;
 			
 			
 			db.updatePositionStatus(MCEStatus.CONNECTION_CLOSED, deviceuid) ;
-		}
-		else
-		{
-			log.info("关闭超时连接，不修改设备状态.序列号：" + deviceuid) ;
-		}
+		//}
+		//else
+		//{
+		//	log.info("关闭超时连接，不修改设备状态.序列号：" + deviceuid) ;
+		//}
 		//save socket closed log ...
 		Object reson = session.getAttribute("event_type") ;
 		if (reson == null)

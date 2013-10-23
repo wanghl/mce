@@ -5,6 +5,7 @@ import org.apache.mina.core.session.IoSession;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mce.uitl.MCECommand;
 
 public class MCEReceiveMessageAction extends MCECommandAction{
 	
@@ -45,10 +46,25 @@ public class MCEReceiveMessageAction extends MCECommandAction{
 					session.write("MOID 901.1.109\n") ;
 				}
 			}
+			else if (oid.startsWith("901"))
+			{
+				if( jsonobject.getInteger("errno") == 0)
+				{
+					log.info("MCE参数设置成功！ MCE 序列号： " + session.getAttribute("deviceuid"));
+					log.info("重新读取设备参数， 发送901命令。。。") ;
+					session.write(MCECommand.ALL_STATE_109) ;
+				}
+				else
+				{
+					log.info("MCE参数设置失败！ MCE序列号：" + session.getAttribute("deviceuid")) ;
+					log.info("错误代码 ： " + jsonobject.getString("errno")) ;
+					log.info("错误信息 ： " + jsonobject.getString("errstr")) ;
+				}
+			}
 		}
 		else if ( oid.endsWith(".2"))
 		{
-			//此为读取配置返回报文
+			//此为读取空调配置返回报文
 			if(oid.startsWith("104"))
 			{
 				if (errno == 0)
@@ -66,6 +82,22 @@ public class MCEReceiveMessageAction extends MCECommandAction{
 				}
 				
 			}
+			//读取设备配置信息返回报文
+			else if (oid.startsWith("901"))
+			{
+				if (errno == 0)
+				{
+					log.info("读取901设备配置参数成功！ MCE序列号：" + session.getAttribute("deviceuid"))  ;
+					String key = session.getAttribute("deviceuid").toString() + "901.1.2" ;
+					session.setAttribute(key ,message) ;
+				}
+				else
+				{
+					log.info("读取MCE设备配置参数失败！ MCE序列号：" + session.getAttribute("deviceuid")) ;
+					log.info("错误代码 ： " + jsonobject.getString("errno")) ;
+					log.info("错误信息 ： " + jsonobject.getString("errstr")) ;
+				}
+			}
 		}
 		else if ( oid.endsWith(".199"))
 		{
@@ -79,9 +111,16 @@ public class MCEReceiveMessageAction extends MCECommandAction{
 				
 			}
 		}
+		else if( oid.endsWith(".131"))
+		{
+			if( errno == 0 )
+			{
+				log.info(" 打开设备代理端口成功") ;
+			}
+		}
 		else
 		{
-			throw new RuntimeException("未知OID： " + oid) ;
+			throw new RuntimeException("未知OID： " + oid +  " MESSAGE : " + message) ;
 		}
 	}
 

@@ -51,6 +51,10 @@ public class DatabaseOperator {
 		try
 		{
 			connection = DBConnection.getInstance("tools");
+			if ( connection == null )
+			{
+				log.error("从连接池中获取数据库连接失败。");
+			}
 			ps = connection.prepareStatement(sql);
 		
 			int j = 1 ;

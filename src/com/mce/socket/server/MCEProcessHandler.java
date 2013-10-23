@@ -43,21 +43,24 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 			JSONObject jsonobject = JSON.parseObject(message.toString());
 			JSONParser jsonparser = new JSONParser();
 			// deviceuid put to session
-			String oid = jsonobject.getString("oid");
-			if (oid.equals("901.1.109") || session.getAttribute("deviceuid").equals("")) {
-				//String model = db.execueQuery(ModelSql.getSerialNoSql(), null).get("jsonNode").toString();
-				String model = SystemConfiguration.getProperty("serialno").toString() ;
-				String deviceSerialno = jsonparser.getJsonValue(model, jsonobject.getJSONObject("retval")).toString();
-				session.setAttribute("deviceuid", deviceSerialno );
-				int isDeviceNoUse = deviceInit(deviceSerialno,jsonobject, session) ;
-				if(isDeviceNoUse < 0)
-					return ;
-
-			}
-			if ( message.toString().contains("MCE Home"))
+				String oid = jsonobject.getString("oid");
+			if ( ! oid.equals("901.1.2") && ! oid.equals("901.1.12") )
 			{
-				message = message.toString().replace("MCE Home", session.getAttribute("deviceuid").toString()) ;
-				jsonobject = JSON.parseObject(message.toString());
+				if (oid.equals("901.1.109") || session.getAttribute("deviceuid").equals("")) {
+					//String model = db.execueQuery(ModelSql.getSerialNoSql(), null).get("jsonNode").toString();
+					String model = SystemConfiguration.getProperty("serialno").toString() ;
+					String deviceSerialno = jsonparser.getJsonValue(model, jsonobject.getJSONObject("retval")).toString();
+					session.setAttribute("deviceuid", deviceSerialno );
+					int isDeviceNoUse = deviceInit(deviceSerialno,jsonobject, session) ;
+					if(isDeviceNoUse < 0)
+						return ;
+	
+				}
+				if ( message.toString().contains("MCE Home"))
+				{
+					message = message.toString().replace("MCE Home", session.getAttribute("deviceuid").toString()) ;
+					jsonobject = JSON.parseObject(message.toString());
+				}
 			}
 			// 业务逻辑处理开始
 			IMCECommandAction action = new MCECommandAction();
@@ -78,7 +81,7 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 			{
 				String mstr ;
 				//处理粘包的情况。如果109 103报文和104设备的控制报文一起发上来 ，尝试解析
-				log.info("处理粘包情况：整个包中共解析出 " + msg.length + " 条报文。只处理104设备控制命令返回报文，其余类型报文将被丢弃。") ;
+				log.info("处理粘包情况：整个包中共解析出 " + msg.length + " 条报文。") ;
 				for (int i = 0 ; i < msg.length ;i ++)
 				{
 					mstr = msg[i];
@@ -91,21 +94,21 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 						mstr = "{" + mstr ;
 					}
 					log.info(mstr) ;
-					if (mstr.indexOf("oid") > 0 && JSON.parseObject(mstr).getString("oid").contains("104"))
-					{
+					//if (mstr.indexOf("oid") > 0 && JSON.parseObject(mstr).getString("oid").contains("104"))
+					//{
 						log.info("二次解析成功! : " + mstr) ;
 						IMCECommandAction action = new MCECommandAction();
 						action.doAction(mstr, session.getAttribute("deviceuid").toString(),session);
 						break;
 						
-					}
+					//}
 				}
 			}
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 			log.error("Error:" + e) ;
-			log.error("处理报文:" + message.toString());
+			log.error("MCE序列号： " + session.getAttribute("deviceuid") + "报文：\n"+ message.toString());
 			if(session.getAttribute("deviceuid").toString().equals(""))
 			{
 				 session.write("MOID 901.1.109\n") ;

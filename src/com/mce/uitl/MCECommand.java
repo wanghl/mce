@@ -10,6 +10,10 @@ public class MCECommand {
 	
 	public static final String SET_TIME = "MOID 901.1.117 ";  //同步时间命令
 	
+	public static final String OPEN_PROCXY_PORT = "MOID 901.1.131\n" ;
+	
+	
+	
 
 	
 

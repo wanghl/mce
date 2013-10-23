@@ -1,5 +1,6 @@
 package com.mce.action;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import com.mce.json.parser.ModelSql;
 import com.mce.socket.server.SessionManager;
 import com.mce.uitl.MCECommand;
 import com.mce.uitl.MCEStatus;
+import com.mce.uitl.MCEUtil;
 import com.mce.uitl.MD5Util;
 
 public class MCE109CommandAction extends MCECommandAction  {
@@ -135,6 +137,8 @@ public class MCE109CommandAction extends MCECommandAction  {
 				log.error(e);
 				throw e ;
 			}
+			//读901设备参数
+			session.write("MOID 901.1.2\n") ;
 			// 读取104设备参数  。设备每次连接后 都把设备参数读过来放到session对象里
 			List list = db.execueQueryReturnMore(ModelSql.get104Device(deviceserialno), null);
 			int j = 1 ;
@@ -146,10 +150,8 @@ public class MCE109CommandAction extends MCECommandAction  {
 			
 			//发送时间同步命令 ，同步MCE时间
 			
-			String dateline = new Date().getTime() + "";
-			session.write(MCECommand.SET_TIME + dateline.substring(0, 10) + "\n") ;
-			
-		
+			//String dateline = Long.toString(MCEUtil.getUTCString() / 1000 ) ; 
+			//session.write(MCECommand.SET_TIME  + dateline + "\n") ;
 			
 		}
 		else
@@ -157,5 +159,14 @@ public class MCE109CommandAction extends MCECommandAction  {
 			commandAction.doAction(message, deviceserialno,session);
 		}
 	}
-
+	
+	public static void main(String[] argvs) throws ParseException
+	{
+		
+		System.out.println(System.currentTimeMillis() / 1000L ) ;
+		
+		
+		
+	}
+	
 }
