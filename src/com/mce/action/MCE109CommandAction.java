@@ -160,13 +160,5 @@ public class MCE109CommandAction extends MCECommandAction  {
 		}
 	}
 	
-	public static void main(String[] argvs) throws ParseException
-	{
-		
-		System.out.println(System.currentTimeMillis() / 1000L ) ;
-		
-		
-		
-	}
-	
+
 }

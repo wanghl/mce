@@ -77,6 +77,11 @@ public class ModelSql {
 		return "select * from alarmtype" ;
 	}
 	
+	public static String getAlarmDescBycode()
+	{
+		return "select alarmdesc from alarmtype where alarmtypecode = ?" ;
+	}
+	
 	public static String getPositionBySerialNoSql()
 	{
 		return "select * from env_position where positionid = ?" ;
@@ -187,7 +192,7 @@ public class ModelSql {
 	
 	public static String getEmailSql()
 	{
-		return "select email from do_org_user" ;
+		return "select email from do_org_user where email is not null" ;
 	}
 	
 	public static String get104Device(String serialno)
@@ -198,6 +203,17 @@ public class ModelSql {
 	public static String get104DeviceBySerialno()
 	{
 		return "select * from device_config where deviceid = ?" ;
+	}
+	
+	public static String getSystemParas()
+	
+	{
+		return "select parasvalue from env_sysparas where parasvalue= ? " ;
+	}
+	
+	public static String getUserMobile()
+	{
+		return "select u.mobile from do_org_user u inner join v_user_position v on u.objuid=v.useruid and v.positionuid= ? and u.mobile is not null" ;
 	}
 
 	

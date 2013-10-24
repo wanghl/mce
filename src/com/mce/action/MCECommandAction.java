@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -115,6 +116,9 @@ public class MCECommandAction implements IMCECommandAction{
 					//任何设备有告警信息,修改设备归属点的状态
 					//db.executeSaveOrUpdate(ModelSql.updatePositionStatus() ,new Object[]{MCEStatus.HAS_ALARM, deviceserialno}) ;
 					db.updatePositionStatus(MCEStatus.HAS_ALARM, serialno) ;
+					// 发送报警短信
+					
+					sendAlarmSMS(serialno, devicename + "001") ;
 					return false ;
 				}
 			}
@@ -201,6 +205,11 @@ public class MCECommandAction implements IMCECommandAction{
 						//任何设备有告警信息,修改设备归属点的状态
 						//db.executeSaveOrUpdate(ModelSql.updatePositionStatus() ,new Object[]{MCEStatus.HAS_ALARM, deviceserialno}) ;
 						db.updatePositionStatus(MCEStatus.HAS_ALARM, deviceserialno) ;
+						// 发送报警短信
+						
+						sendAlarmSMS(deviceserialno, entry.getKey()) ;
+						
+					
 					}
 					else
 					{
@@ -231,15 +240,15 @@ public class MCECommandAction implements IMCECommandAction{
 					{
 						return ;
 					}
-					
-					
 					if(isAlarmShow(deviceuid ,devicename ,set.getKey()))
 					{
-						
 						db.executeSaveOrUpdate(insertAlarmSql, new Object[]{MD5Util.getObjuid() ,deviceuid ,time ,set.getKey() , 0});
 						//任何设备有告警信息,修改设备归属点的状态
 						//db.executeSaveOrUpdate(ModelSql.updatePositionStatus() ,new Object[]{MCEStatus.HAS_ALARM, deviceserialno}) ;
 						db.updatePositionStatus(MCEStatus.HAS_ALARM, deviceserialno) ;
+						
+						// 发送报警短信
+						sendAlarmSMS(deviceserialno, set.getKey()) ;
 					}
 					else
 					{
@@ -294,6 +303,42 @@ public class MCECommandAction implements IMCECommandAction{
 			value.put(key, JSON.parseObject(map.get(key).toString()).getString("active")) ;
 		}
 		return value ;
+	}
+	
+	
+	public void sendAlarmSMS(String deviceserialno ,String alarmType)
+	{
+		SystemConfiguration.reload() ;
+		if( SystemConfiguration.getProperty("alarmsmsonoff").equals("1"))
+		{
+			Map position = db.execueQuery(ModelSql.getPositionBySerialNoSql(), new Object[]{deviceserialno}) ;
+			String telNumber ="" ;
+			List<Map> lm = db.execueQueryReturnMore(ModelSql.getUserMobile(), new Object[]{position.get("objuid")}) ;
+			for (int i = 0 ; i < lm.size() ; i++)
+			{
+				if ( lm.get(i) != null && lm.get(i).toString().length() > 0)
+				{
+					telNumber = telNumber+ lm.get(i).get("mobile") + "," ;
+				}
+			}
+			telNumber = telNumber.substring(0 ,telNumber.length() -1) ;
+			
+			Map alarmDesc = db.execueQuery(ModelSql.getAlarmDescBycode(), new Object[]{alarmType}) ;
+			
+			String message = "设备告警: " + alarmType + " " + alarmDesc.get("alarmdesc") + " 。序列号 ：" + position.get("positionid") + " ,环控点名称：" + position.get("positiondesc") ;
+			log.info("准备发送告警短信 ，接收号码：" + telNumber + " 短信内容： " + message ) ;
+			SendSMSAction.sendMessage(telNumber, message) ;
+			
+		}
+	}
+	
+	
+	public static void main(String[] argvs)
+	{
+		SystemConfiguration.loadProperty() ;
+		MCECommandAction m = new MCECommandAction() ;
+		m.sendAlarmSMS("13990005",  "103113") ;
+		
 	}
 	
 	

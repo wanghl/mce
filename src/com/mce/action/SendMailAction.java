@@ -1,6 +1,7 @@
 package com.mce.action;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.BodyPart;
@@ -13,6 +14,10 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+import com.mce.db.operate.DatabaseOperator;
+import com.mce.uitl.ErrorLogUtil;
+import com.sun.media.Log;
+
 public class SendMailAction {
 	
 	public static void sendMail(String receiver ,String title ,String content)
@@ -23,7 +28,7 @@ public class SendMailAction {
 	        MimeMessage message = null;
 	        BodyPart messageBodyPart = new MimeBodyPart();
 	        Multipart multipart = new MimeMultipart();
-	        
+	        DatabaseOperator db = new DatabaseOperator() ;
 	        String from = "xbwolf@sina.cn" ;
 	        
 	        try
@@ -64,8 +69,9 @@ public class SendMailAction {
 	        	  
 	        }catch(Exception e){
 	        	
-	        	e.printStackTrace() ;
-	        	
+				Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDMAIL_ERROR_CODE, e.getMessage(), "邮件发送错误", "执行位置：SendMailAction" + e.getMessage());
+				db.saveErrorLog(datamap);
+	        	Log.error(e) ;
 	        }
 		
 	}

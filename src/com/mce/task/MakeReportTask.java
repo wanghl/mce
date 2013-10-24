@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -16,9 +17,11 @@ import com.mce.action.SendMailAction;
 import com.mce.action.SystemConfiguration;
 import com.mce.db.operate.DatabaseOperator;
 import com.mce.json.parser.ModelSql;
+import com.mce.uitl.ErrorLogUtil;
 import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MCEUtil;
 import com.mce.uitl.MD5Util;
+import com.sun.media.Log;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -27,6 +30,8 @@ import freemarker.template.Template;
  * @author wanghongliang 定时生成设备运行日报
  */
 public class MakeReportTask implements Job {
+	
+	private static final Logger log = Logger.getLogger(MakeReportTask.class) ;
 	private static final String[] MCESTATUS = new String[] { MCEStatus.CONNECTION_CLOSED,
 															MCEStatus.HAS_ALARM,
 															MCEStatus.SUCCESS };
@@ -52,7 +57,7 @@ public class MakeReportTask implements Job {
 		List<Map> alarmList = new ArrayList<Map>();
 		List<Map> unrunList = new ArrayList<Map>();
 		List<Map> successList = new ArrayList<Map>();
-
+		try {
 		for (String status : MCESTATUS) {
 			// process closed position
 			List<Map> list = db.execueQueryReturnMore(ModelSql.getPositionByStateSql(), new Object[] { status });
@@ -100,6 +105,8 @@ public class MakeReportTask implements Job {
 								long runtime = ((Timestamp) dbRestult.get("connection_time")).getTime();
 								dbObject.put("runtime", MCEUtil.getBetweenDate(runtime));
 							} catch (Exception e) {
+								
+								log.error(e) ;
 
 							}
 
@@ -220,6 +227,7 @@ public class MakeReportTask implements Job {
 		// send report mail .
 		
 		// 先判断发送邮件配置
+		SystemConfiguration.reload() ;
 		if ( SystemConfiguration.getProperty("reportmailonoff").toString().equals("1") )
 		{
 			
@@ -233,16 +241,22 @@ public class MakeReportTask implements Job {
 			}
 			String title = "MCE " + MCEUtil.getCurrentDate() + " 运行日志。服务器名称：" + SystemConfiguration.getProperty("servername") + " 未连接"
 				+ unruncount + "台 ，有告警" + alarmcount + "台，正常运行" + successcount + "台" ;
+			log.info("准备发送运行日志。TITLE :" + title) ;
 			//sned it 
 			SendMailAction.sendMail(sb.toString() , title ,mailContent) ;
+		}
+		}catch (Exception e)
+		{
+			Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDMAIL_ERROR_CODE, e.getLocalizedMessage(), "邮件发送错误", "执行位置：MakeReportTask" + e.getMessage());
+			db.saveErrorLog(datamap);
+        	Log.error(e) ;
 		}
 	}
 
 	
 
 	public static void main(String[] argvs) throws Exception {
-		SystemConfiguration s = new SystemConfiguration();
-		s.initialization();
+		SystemConfiguration.loadProperty();
 		MakeReportTask t = new MakeReportTask();
 		t.execute(null);
 

@@ -16,6 +16,10 @@ public class ErrorLogUtil {
 	
 	public static final String RUNTIME_ERROR_CODE = "E005" ; //运行时错误
 	
+	public static final String SENDSMS_ERROR_CODE = "E006" ; //发短信错误
+	
+	public static final String SENDMAIL_ERROR_CODE = "E007" ; //发短信错误
+	
 	@SuppressWarnings("unchecked")
 	public  static Map getErrorInfoMap(String typecode ,String exception ,String exceptiondesc ,String memo )
 	{

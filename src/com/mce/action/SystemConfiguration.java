@@ -15,10 +15,10 @@ import com.mce.uitl.ErrorLogUtil;
 import com.zephyr.sql.DBConnection;
 
 public class SystemConfiguration {
-	private Logger log = Logger.getLogger(SystemConfiguration.class);
+	private static Logger log = Logger.getLogger(SystemConfiguration.class);
 	private static  Map<String ,Object> configuration = new ConcurrentHashMap<String,Object>() ;
 	
-	public SystemConfiguration () {};
+	private SystemConfiguration () {};
 	
 	public  void  initialization()
 	{
@@ -28,7 +28,7 @@ public class SystemConfiguration {
 		}
 	}
 	
-	public void reload()
+	public static void reload()
 	{
 		configuration.clear() ;
 		loadProperty() ;
@@ -39,7 +39,7 @@ public class SystemConfiguration {
 		return configuration.get(key) ;
 	}
 	
-	private void loadProperty()
+	public static void loadProperty()
 	{
 		DBConnection conn = null ;
 		PreparedStatement ps = null ;
@@ -150,7 +150,7 @@ public class SystemConfiguration {
 	}
 	
 	
-	private List loadMessageConfig(String sql)
+	private static List loadMessageConfig(String sql)
 	{
 		DBConnection conn = null ;
 		PreparedStatement ps = null ;

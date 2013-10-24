@@ -19,13 +19,13 @@ public class SocketClient {
 		Socket socket  = new Socket( "127.0.0.1", 10101 );
 		String tmp ;
 		
+		socket.getOutputStream().write(getJsonMessage("d:/109.txt").getBytes()) ;
 //		try {
 //			Thread.sleep(20000000) ;
 //		} catch (InterruptedException e) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-		socket.getOutputStream().write(getJsonMessage("d:/109.txt").getBytes()) ;
 		socket.setKeepAlive(true) ;
 		BufferedReader reader  = new BufferedReader(new InputStreamReader(socket.getInputStream())) ;
 		while( (tmp = reader.readLine()) != null)
