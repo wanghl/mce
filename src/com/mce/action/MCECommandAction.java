@@ -20,6 +20,7 @@ import com.mce.json.parser.ModelObject;
 import com.mce.json.parser.ModelSql;
 import com.mce.json.parser.SQLParserConfig;
 import com.mce.uitl.MCEStatus;
+import com.mce.uitl.MCEUtil;
 import com.mce.uitl.MD5Util;
 
 public class MCECommandAction implements IMCECommandAction{
@@ -79,15 +80,16 @@ public class MCECommandAction implements IMCECommandAction{
 			return false ;
 		}
 		Map currentValue = db.execueQuery(ModelSql.getCurrentByDevicduid(devname), new Object[]{linkdeviceuid}) ;
+		ModelObject current = sqlparser.getCurrentModelObject( devname, devnumber,jsonobject);
 	
+		Long updatetime = new Long((Integer)current.getJsonValue().get("update_time")) * 1000;
 		if(currentValue != null)
 		{
 			// current
-			ModelObject current = sqlparser.getCurrentModelObject( devname, devnumber,jsonobject);
 			current.setObjuid(MD5Util.getObjuid());
 			current.setDeviceuid(linkdeviceuid);
 			//先比较当前收到报文中的updatetime 和 数据库中的updatetime  
-			Timestamp source = new Timestamp( new Long((Integer)current.getJsonValue().get("update_time")) * 1000) ;
+			Timestamp source = new Timestamp( updatetime ) ;
 			Timestamp dest = (Timestamp) currentValue.get("updatetime") ;
 			if(log.isDebugEnabled())
 			{
@@ -99,7 +101,7 @@ public class MCECommandAction implements IMCECommandAction{
 			//如果当前收到报文中的updatetime较新 
 			if( source.after(dest))
 			{
-				processAlarmMessage(jsonobject ,devname, deviceuid ,serialno) ;
+				processAlarmMessage(jsonobject ,devname, deviceuid ,serialno ,updatetime) ;
 				db.executeSaveOrUpdate(current);
 			}
 			 //如果报文和数据库里的时间相等
@@ -118,7 +120,7 @@ public class MCECommandAction implements IMCECommandAction{
 					db.updatePositionStatus(MCEStatus.HAS_ALARM, serialno) ;
 					// 发送报警短信
 					
-					sendAlarmSMS(serialno, devicename + "001") ;
+					sendAlarmSMS(serialno, devicename + "001" ,updatetime) ;
 					return false ;
 				}
 			}
@@ -133,8 +135,8 @@ public class MCECommandAction implements IMCECommandAction{
 			}
 		}else
 		{
-			processAlarmMessage(jsonobject ,devname, deviceuid ,serialno) ;
-			ModelObject current = sqlparser.getCurrentModelObject( devicename, devicenumber,jsonobject);
+			processAlarmMessage(jsonobject ,devname, deviceuid ,serialno ,updatetime) ;
+			 current = sqlparser.getCurrentModelObject( devicename, devicenumber,jsonobject);
 			insertNode(current, linkdeviceuid) ;
 			
 		}
@@ -166,7 +168,7 @@ public class MCECommandAction implements IMCECommandAction{
 	 * @param devicename
 	 * @param deviceuid
 	 */
-	protected void processAlarmMessage(JSONObject jsonObject ,String devicename ,String deviceuid ,String deviceserialno)
+	protected void processAlarmMessage(JSONObject jsonObject ,String devicename ,String deviceuid ,String deviceserialno ,Long updatetime)
 	{
 		
 		//首先判断总报警开关是否关闭，如果关闭则不处理任何告警
@@ -207,7 +209,7 @@ public class MCECommandAction implements IMCECommandAction{
 						db.updatePositionStatus(MCEStatus.HAS_ALARM, deviceserialno) ;
 						// 发送报警短信
 						
-						sendAlarmSMS(deviceserialno, entry.getKey()) ;
+						sendAlarmSMS(deviceserialno, entry.getKey() ,updatetime) ;
 						
 					
 					}
@@ -248,7 +250,7 @@ public class MCECommandAction implements IMCECommandAction{
 						db.updatePositionStatus(MCEStatus.HAS_ALARM, deviceserialno) ;
 						
 						// 发送报警短信
-						sendAlarmSMS(deviceserialno, set.getKey()) ;
+						sendAlarmSMS(deviceserialno, set.getKey() ,updatetime) ;
 					}
 					else
 					{
@@ -306,7 +308,7 @@ public class MCECommandAction implements IMCECommandAction{
 	}
 	
 	
-	public void sendAlarmSMS(String deviceserialno ,String alarmType)
+	public void sendAlarmSMS(String deviceserialno ,String alarmType ,Long updatetime)
 	{
 		SystemConfiguration.reload() ;
 		if( SystemConfiguration.getProperty("alarmsmsonoff").equals("1"))
@@ -325,7 +327,7 @@ public class MCECommandAction implements IMCECommandAction{
 			
 			Map alarmDesc = db.execueQuery(ModelSql.getAlarmDescBycode(), new Object[]{alarmType}) ;
 			
-			String message = "设备告警: " + alarmType + " " + alarmDesc.get("alarmdesc") + " 。序列号 ：" + position.get("positionid") + " ,环控点名称：" + position.get("positiondesc") ;
+			String message = "设备告警: " + alarmType + " " + alarmDesc.get("alarmdesc") + " 。序列号 ：" + position.get("positionid") + " ,环控点名称：" + position.get("positiondesc") + ".告警时间" + MCEUtil.getCurrentDateZH(updatetime);
 			log.info("准备发送告警短信 ，接收号码：" + telNumber + " 短信内容： " + message ) ;
 			SendSMSAction.sendMessage(telNumber, message) ;
 			
@@ -337,7 +339,7 @@ public class MCECommandAction implements IMCECommandAction{
 	{
 		SystemConfiguration.loadProperty() ;
 		MCECommandAction m = new MCECommandAction() ;
-		m.sendAlarmSMS("13990005",  "103113") ;
+		m.sendAlarmSMS("13990005",  "103113" ,new Date().getTime()) ;
 		
 	}
 	

@@ -49,6 +49,7 @@ public class SendSMSAction {
 					"utf-8"));
 			String tmp = "";
 			while ((tmp = br.readLine()) != null) {
+				log.info("短信发送返回报文：" + tmp) ;
 				tmp = native2Ascii(tmp ) ;
 			}
 			if ( tmp != null)
@@ -113,7 +114,6 @@ public class SendSMSAction {
 	
 	public static void main(String[] argvs)
 	{
-		SendSMSAction.sendMessage("18647132049", null) ;
 	}
 
 }

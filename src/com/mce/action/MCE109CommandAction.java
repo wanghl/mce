@@ -75,7 +75,7 @@ public class MCE109CommandAction extends MCECommandAction  {
 							db.executeSaveOrUpdate(config);
 							
 							// alarm
-							processAlarmMessage(jsonobject ,devicename ,config.getObjuid(),deviceserialno) ;
+							processAlarmMessage(jsonobject ,devicename ,config.getObjuid(),deviceserialno ,new Date().getTime()) ;
 							
 							// insert current node 
 							ModelObject current = sqlparser.getCurrentModelObject( devicename, devicenumber,jsonobject);

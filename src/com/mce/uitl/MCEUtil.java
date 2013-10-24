@@ -42,6 +42,12 @@ public class MCEUtil {
 		
 		return sdf.format(new Date());
 	}
+	public static String getCurrentDateZH(Long date) {
+		Locale loc = new Locale("zh", "CN");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", loc);
+		
+		return sdf.format(new Date(date));
+	}
 	public static String getCurrentDateAll() {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		
