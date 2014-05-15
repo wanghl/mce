@@ -18,7 +18,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.mce.db.operate.DatabaseOperator;
 import com.mce.json.parser.ModelSql;
 import com.mce.uitl.ErrorLogUtil;
-import com.sun.media.Log;
 
 /**
  * 
@@ -32,6 +31,16 @@ public class SendSMSAction {
 	public static void sendMessage(String numberList, String content)
 	{
 		DatabaseOperator db = new DatabaseOperator() ;
+		String messgaeTitle = SystemConfiguration.getProperty("messagetitle").toString();
+		if ( messgaeTitle.contains(":"))
+		{
+			content = messgaeTitle.replace("(.*)", " " + content) ;
+		}
+		else
+		{
+			content = messgaeTitle.replace("(.*)", ": " + content) ;
+		}
+	//	content = SystemConfiguration.getProperty("messagetitle").toString().replace("(.*)", content) ;
 		try {
 			HttpClient client = new HttpClient();
 			HttpMethod method;
@@ -41,8 +50,9 @@ public class SendSMSAction {
 							+ "&c="
 							+ java.net.URLEncoder
 									.encode(
-											SystemConfiguration.getProperty("messagetitle").toString() + ": " +  content,
-											"utf-8"));
+											//SystemConfiguration.getProperty("messagetitle").toString() + ": " +  content,
+										content ,	
+										"utf-8"));
 			client.executeMethod(method);
 			InputStream in = method.getResponseBodyAsStream();
 			BufferedReader br = new BufferedReader(new InputStreamReader(in,
@@ -69,12 +79,12 @@ public class SendSMSAction {
 			method.releaseConnection();
 		} catch (HttpException e) {
 			// TODO Auto-generated catch block
-			Log.error(e); 
+			log.error(e); 
 			
 			Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDSMS_ERROR_CODE, e.getMessage(), "短信发送错误", "执行位置：SendSMSAction" + e.getMessage());
 			db.saveErrorLog(datamap);
 		} catch (IOException e) {
-			Log.error(e); 
+			log.error(e); 
 			Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDSMS_ERROR_CODE, e.getMessage(), "短信发送错误", "执行位置：SendSMSAction" + e.getMessage());
 			db.saveErrorLog(datamap);
 		}
@@ -114,6 +124,8 @@ public class SendSMSAction {
 	
 	public static void main(String[] argvs)
 	{
+		SystemConfiguration.reload() ;
+		SendSMSAction.sendMessage("18647132049", "测试看行不行") ;
 	}
 
 }

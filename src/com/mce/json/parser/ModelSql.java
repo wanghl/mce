@@ -89,7 +89,7 @@ public class ModelSql {
 	
 	public static String getPositionByStateSql()
 	{
-		return "select * from env_position where positionstate = ?" ;
+		return "select * from env_position where positionstate != 99" ;
 	}
 	
 	public static String getCurrentByDevicduid(String devicename)

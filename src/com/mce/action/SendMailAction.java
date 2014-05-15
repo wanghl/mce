@@ -16,7 +16,6 @@ import javax.mail.internet.MimeMultipart;
 
 import com.mce.db.operate.DatabaseOperator;
 import com.mce.uitl.ErrorLogUtil;
-import com.sun.media.Log;
 
 public class SendMailAction {
 	
@@ -71,7 +70,6 @@ public class SendMailAction {
 	        	
 				Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDMAIL_ERROR_CODE, e.getMessage(), "邮件发送错误", "执行位置：SendMailAction" + e.getMessage());
 				db.saveErrorLog(datamap);
-	        	Log.error(e) ;
 	        }
 		
 	}

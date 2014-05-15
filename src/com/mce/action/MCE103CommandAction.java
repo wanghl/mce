@@ -9,6 +9,7 @@ import org.apache.mina.core.session.IoSession;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mce.db.operate.DatabaseOperator;
 import com.mce.json.parser.ModelObject;
 import com.mce.json.parser.ModelSql;
 import com.mce.socket.server.SessionManager;
@@ -94,6 +95,7 @@ public class MCE103CommandAction extends MCECommandAction {
 	}
 	
 	/**
+	 *  检测设备是否停用 。另如果收到103报文后 ，设备还处于连接断开状态， 将其改为正常。
 	 * 
 	 * @param serialno
 	 * @return 0 正常  -1 设备停用 -2 设备不存在
@@ -109,6 +111,10 @@ public class MCE103CommandAction extends MCECommandAction {
 			{
 				value = -1  ;
 			}
+			else if ( map.get("positionstate").toString().equals(MCEStatus.CONNECTION_CLOSED))
+			{
+				db.executeSaveOrUpdate(ModelSql.updatePositionStatus(), new Object[]{MCEStatus.SUCCESS ,serialno}) ;
+			}
 		}
 		else
 		{
@@ -118,4 +124,5 @@ public class MCE103CommandAction extends MCECommandAction {
 		return value ;
 		
 	}
+	
 }

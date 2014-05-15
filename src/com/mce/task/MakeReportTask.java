@@ -21,7 +21,6 @@ import com.mce.uitl.ErrorLogUtil;
 import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MCEUtil;
 import com.mce.uitl.MD5Util;
-import com.sun.media.Log;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -58,18 +57,19 @@ public class MakeReportTask implements Job {
 		List<Map> unrunList = new ArrayList<Map>();
 		List<Map> successList = new ArrayList<Map>();
 		try {
-		for (String status : MCESTATUS) {
+		//for (String status : MCESTATUS) {
 			// process closed position
-			List<Map> list = db.execueQueryReturnMore(ModelSql.getPositionByStateSql(), new Object[] { status });
+			List<Map> list = db.execueQueryReturnMore(ModelSql.getPositionByStateSql(), null);
 			sumcount += list.size();
+			String status = null ;
 			List<Map> value = new ArrayList<Map>();
 			Map dbObject = new HashMap();
 			Map dbRestult = new HashMap();
 			if (!list.isEmpty()) {
 				for (Map map : list) {
 					dbRestult = db.execueQuery(ModelSql.getMakeDeviceReportSql(), new Object[] { map.get("positionid"),
-																								map.get("positionid") });
-
+					                                                                           map.get("positionid") });
+					status =  (String) map.get("positionstate") ;
 					if (dbRestult == null) {
 						continue;
 					}
@@ -105,7 +105,7 @@ public class MakeReportTask implements Job {
 								long runtime = ((Timestamp) dbRestult.get("connection_time")).getTime();
 								dbObject.put("runtime", MCEUtil.getBetweenDate(runtime));
 							} catch (Exception e) {
-								
+								e.printStackTrace();
 								log.error(e) ;
 
 							}
@@ -201,7 +201,7 @@ public class MakeReportTask implements Job {
 
 				}
 			}
-		}
+		//}
 
 		String times = SystemConfiguration.getProperty("createreporttime").toString();
 		times = times.split(" ")[2] + ":" + times.split(" ")[1] + ":" + times.split(" ")[0];
@@ -209,7 +209,7 @@ public class MakeReportTask implements Job {
 
 		String summarydesc = "从 " + MCEUtil.getBeforeDate(MCEUtil.getCurrentDate()) + " " + times + " 到 " + MCEUtil.getCurrentDate() + " " + times + " ，共有 " + sumcount + "台设备处于使用状态" + "，其中未连接"
 				+ unruncount + "台 ，有告警" + alarmcount + "台，正常运行" + successcount + "台。以下是详细信息：";
-
+		System.out.println( summarydesc ) ;
 		dataModel.put("summary", summarydesc);
 		dataModel.put("success", successList);
 		dataModel.put("unrun", unrunList);
@@ -247,9 +247,10 @@ public class MakeReportTask implements Job {
 		}
 		}catch (Exception e)
 		{
+			e.printStackTrace();
 			Map datamap = ErrorLogUtil.getErrorInfoMap(ErrorLogUtil.SENDMAIL_ERROR_CODE, e.getLocalizedMessage(), "邮件发送错误", "执行位置：MakeReportTask" + e.getMessage());
 			db.saveErrorLog(datamap);
-        	Log.error(e) ;
+        	log.error(e) ;
 		}
 	}
 
