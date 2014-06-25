@@ -179,7 +179,7 @@ public class MCECommandAction implements IMCECommandAction{
 		}
 		Map jsonMap =jsonObject.getJSONObject(devicename)
 		.getJSONObject(devicenumber).getJSONObject("current").getJSONObject("alarm") ;
-		Map<String,String >jsonAlarm = parseAlarm(jsonMap ); 
+		Map<String,String >jsonAlarm = parseAlarm(jsonMap , devicename); 
 		String sql = "select * from device" + devicename + "_s where deviceuid = ? order by updatetime desc limit 1" ;
 		String insertAlarmSql = "insert into alarm_message(objuid ,deviceuid ,alarmtime,alarmtype ,alarmstate) values(?,?,?,?,?)" ;
 		Map dbAlarm = db.execueQuery(sql, new Object[]{deviceuid}) ;
@@ -270,6 +270,8 @@ public class MCECommandAction implements IMCECommandAction{
 		Map parmeter = db.execueQuery(ModelSql.getParmeterbyDeviceuidSql(devicename, deviceuid) ,null) ;
 		if(parmeter != null)
 		{
+			if ( parmeter.get("isalarm" + alarmType).toString().equals("1")) 
+				rev=true ;
 			rev = (Boolean) parmeter.get("isalarm" + alarmType);
 			if (rev == null)
 				rev = true;
@@ -294,15 +296,25 @@ public class MCECommandAction implements IMCECommandAction{
 	}
 	
 
-	
-	private Map<String, String> parseAlarm(Map map)
+	// 根据配置表找配置好的告警信息  
+	private Map<String, String> parseAlarm(Map map ,String devicename)
 	{
 		Map<String, String > value = new HashMap<String,String>() ;
 		String key ;
+		// 配置表中关于设备的配置信息
+		List<List> deviceConfig = (List<List>) SystemConfiguration.getProperty("device" + devicename + "_s") ; 
 		for(Iterator it = map.keySet().iterator() ; it.hasNext() ;)
 		{
 			key = it.next().toString() ;
-			value.put(key, JSON.parseObject(map.get(key).toString()).getString("active")) ;
+			for (List paras : deviceConfig)
+			{
+				if ( ( devicename + ".#NUMBER#.current.alarm." + key + ".active" ).equals(  paras.get(0).toString() ) )
+				{
+					value.put(key, JSON.parseObject(map.get(key).toString()).getString("active")) ;
+					break ;
+				}
+			}
+			//log.warn("检测到报文中" + devicename + "设备新增告警类型 " + key + " ，但数据库中未添加相应字段，不做处理.");
 		}
 		return value ;
 	}
@@ -310,12 +322,15 @@ public class MCECommandAction implements IMCECommandAction{
 	
 	public void sendAlarmSMS(String deviceserialno ,String alarmType ,Long updatetime)
 	{
+		try {
 		SystemConfiguration.reload() ;
 		if( SystemConfiguration.getProperty("alarmsmsonoff").equals("1"))
 		{
 			Map position = db.execueQuery(ModelSql.getPositionBySerialNoSql(), new Object[]{deviceserialno}) ;
 			String telNumber ="" ;
 			List<Map> lm = db.execueQueryReturnMore(ModelSql.getUserMobile(), new Object[]{position.get("objuid")}) ;
+			if ( lm.isEmpty() )
+				return ;
 			for (int i = 0 ; i < lm.size() ; i++)
 			{
 				if ( lm.get(i) != null && lm.get(i).toString().length() > 0)
@@ -331,6 +346,10 @@ public class MCECommandAction implements IMCECommandAction{
 			log.info("准备发送告警短信 ，接收号码：" + telNumber + " 短信内容： " + message ) ;
 			SendSMSAction.sendMessage(telNumber, message) ;
 			
+		}
+		}	catch (Exception e )
+		{
+			log.error(" 发送告警短信失败.");
 		}
 	}
 	

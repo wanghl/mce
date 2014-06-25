@@ -4,9 +4,7 @@ package com.mce.json.parser;
 import com.alibaba.fastjson.JSONObject;
 
 public class JSONParser {
-	
-	
-	
+
 	
 	public Object getJsonValue(String model,JSONObject jsonobject)
 	{

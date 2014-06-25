@@ -36,7 +36,7 @@ public class MinaServer extends HttpServlet {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L; 
 	static Logger log = Logger.getLogger(MinaServer.class);
 	DatabaseOperator db = new DatabaseOperator();
 

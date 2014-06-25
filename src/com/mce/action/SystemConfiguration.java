@@ -3,6 +3,7 @@ package com.mce.action;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,7 @@ import com.zephyr.sql.DBConnection;
 public class SystemConfiguration {
 	private static Logger log = Logger.getLogger(SystemConfiguration.class);
 	private static  Map<String ,Object> configuration = new ConcurrentHashMap<String,Object>() ;
+	private static List tableNameList = new ArrayList<String> () ; ;
 	
 	private SystemConfiguration () {};
 	
@@ -124,6 +126,17 @@ public class SystemConfiguration {
 				configuration.put(rs.getString("alarmtypecode"), rs.getString("alarmdesc")) ;
 			}
 			
+			// load table name .... 
+			
+			ps = conn.prepareStatement(ModelSql.getTableNameSql()) ;
+			rs = ps.executeQuery() ;
+			while( rs.next() )
+			{
+				tableNameList.add(rs.getString("table_name")) ;
+			}
+			
+		//	configuration.put("deviceTableNames", tableName) ;
+			
 		}
 		catch (Exception e)
 		{
@@ -147,6 +160,21 @@ public class SystemConfiguration {
 			}
 		}
 		
+	}
+	
+	public static boolean isDeviceTableExists(String tableName)
+	{
+		if ( tableNameList.size() == 0 )
+		{
+			log.error( "系统初始化错误。获取数据库表失败。请重新启动系统" );
+			return true ;
+		}
+		for ( int i = 0  ; i < tableNameList.size() ;i ++)
+		{
+			if ( tableNameList.get(i).equals( tableName ))
+				return true ;
+		}
+		return false ;
 	}
 	
 	

@@ -30,32 +30,32 @@ public class SocketClient {
 		BufferedReader reader  = new BufferedReader(new InputStreamReader(socket.getInputStream())) ;
 		while( (tmp = reader.readLine()) != null)
 		{
-			
+//			
 			if (tmp.equals("MOID 901.1.103"))
 			{
 				socket.getOutputStream().write(getJsonMessage("d:/103.txt").getBytes()) ;
 			}
-			else if (tmp.equals("MOID 901.1.109"))
-			{
-				socket.getOutputStream().write(getJsonMessage("d:/109.txt").getBytes()) ;
-			}
-			else if (tmp.equals("MOID 104.1.2"))
-			{
-				socket.getOutputStream().write(getJsonMessage("d:/kt.txt").getBytes()) ;
-			}
-			else if (tmp.equals("MOID 104.2.2"))
-			{
-				socket.getOutputStream().write(getJsonMessage("d:/kt02.txt").getBytes()) ;
-			}
-			else if (tmp.equals("MOID 104.2.12"))
-			{
-				System.out.println("104.2.12 " +tmp) ;
-			}
-			else if (tmp.equals("MOID 104.1.12"))
-			{
-				System.out.println("104.1.12 " +tmp) ;
-			}
-		}
+//			else if (tmp.equals("MOID 901.1.109"))
+//			{
+//				socket.getOutputStream().write(getJsonMessage("d:/109.txt").getBytes()) ;
+//			}
+//			else if (tmp.equals("MOID 104.1.2"))
+//			{
+//				socket.getOutputStream().write(getJsonMessage("d:/kt.txt").getBytes()) ;
+//			}
+//			else if (tmp.equals("MOID 104.2.2"))
+//			{
+//				socket.getOutputStream().write(getJsonMessage("d:/kt02.txt").getBytes()) ;
+//			}
+//			else if (tmp.equals("MOID 104.2.12"))
+//			{
+//				System.out.println("104.2.12 " +tmp) ;
+//			}
+//			else if (tmp.equals("MOID 104.1.12"))
+//			{
+//				System.out.println("104.1.12 " +tmp) ;
+//			}
+	}
 	}
 	
 	public static String getJsonMessage(String filename) throws IOException

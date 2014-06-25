@@ -482,17 +482,17 @@ public class DatabaseOperator {
 			log.debug("Value: " + object.toString()) ;
 			ps.setString(index, object.toString());
 		}
-		if (valuetype.equals("Integer"))
+		else if (valuetype.equals("Integer"))
 		{
 			log.debug("Value: " + object) ;
 			ps.setInt(index, (Integer) object);
 		}
-		if (valuetype.equals("Byte"))
+		else if (valuetype.equals("Byte"))
 		{
 			log.debug("Value: " + (object.toString().equals("true") ? true : false)) ;
 			ps.setBoolean(index, object.toString().equals("true") ? true : false);
 		}
-		if (valuetype.equals("Date"))
+		else if (valuetype.equals("Date"))
 		{
 			Long time = new Long(Integer.parseInt(object.toString())) ;
 			if(time ==0 )
@@ -505,6 +505,10 @@ public class DatabaseOperator {
 				log.debug("Value: " +new java.util.Date(time * 1000)) ;
 				ps.setObject(index,new java.util.Date(time * 1000)) ;
 			}
+		}
+		else
+		{
+			ps.setObject(index , object);
 		}
 		}catch (Exception e)
 		{

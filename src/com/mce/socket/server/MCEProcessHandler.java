@@ -1,5 +1,6 @@
 package com.mce.socket.server;
 
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.mce.action.SystemConfiguration;
 import com.mce.db.operate.DatabaseOperator;
 import com.mce.json.parser.JSONParser;
 import com.mce.json.parser.ModelSql;
+import com.mce.uitl.Authorization;
 import com.mce.uitl.MCECommand;
 import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MD5Util;
@@ -43,8 +45,8 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 			JSONObject jsonobject = JSON.parseObject(message.toString());
 			JSONParser jsonparser = new JSONParser();
 			// deviceuid put to session
-				String oid = jsonobject.getString("oid");
-			if ( ! oid.equals("901.1.2") && ! oid.equals("901.1.12") )
+			String oid = jsonobject.getString("oid");
+			if ( ! oid.equals("901.1.2") && ! oid.equals("901.1.12") && ! oid.startsWith("104"))
 			{
 				if (oid.equals("901.1.109") || session.getAttribute("deviceuid").equals("")) {
 					//String model = db.execueQuery(ModelSql.getSerialNoSql(), null).get("jsonNode").toString();
@@ -53,7 +55,7 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 					session.setAttribute("deviceuid", deviceSerialno );
 					int isDeviceNoUse = deviceInit(deviceSerialno,jsonobject, session) ;
 					if(isDeviceNoUse < 0)
-						return ;
+						session.close(false) ;
 	
 				}
 				if ( message.toString().contains("MCE Home"))
@@ -146,6 +148,10 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 		if (position == null || position.isEmpty())
 		{
 			log.info("检测到设备为首次连接服务端，准备注册设备信息:") ;
+			Map kv = db.execueQuery(ModelSql.getPositionAmount(), null ) ;
+			if ( ! Authorization.authorizationChecking((Long)kv.get("positionamount")) )
+				
+				return -1 ;
 			positionid = MD5Util.getObjuid() ;
 			//拿901设备描述信息
 			//String model = db.execueQuery(ModelSql.getDescriptionSql(), null).get("jsonNode").toString();
@@ -183,5 +189,16 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 		return 0 ;
 	}
 	
+	public static void main(String[] argvs)
+	{
+		File f = new File("D:\\netdisk\\workspace\\mce\\WebContent\\WEB-INF\\lib") ;
+		String[] files = f.list() ;
+		StringBuffer sb = new StringBuffer() ;
+		for ( String name : files)
+		{
+			sb.append( "/WebContent/WEB_INF/lib/" + name + " " ) ;
+		}
+		System.out.println( sb.toString() ) ;
+	}
 
 }

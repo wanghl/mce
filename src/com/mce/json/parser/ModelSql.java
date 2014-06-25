@@ -77,6 +77,11 @@ public class ModelSql {
 		return "select * from alarmtype" ;
 	}
 	
+	public static String getTableNameSql()
+	{
+		return "select table_name from information_schema.tables where table_schema='envcontrol' and table_name like 'device%_%' and  table_type='base table'" ;
+	}
+	
 	public static String getAlarmDescBycode()
 	{
 		return "select alarmdesc from alarmtype where alarmtypecode = ?" ;
@@ -214,6 +219,11 @@ public class ModelSql {
 	public static String getUserMobile()
 	{
 		return "select u.mobile from do_org_user u inner join v_user_position v on u.objuid=v.useruid and v.positionuid= ? and u.mobile is not null" ;
+	}
+	
+	public static String getPositionAmount()
+	{
+		return "select count(*) as positionamount from env_position" ;
 	}
 
 	

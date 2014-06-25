@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,14 +83,21 @@ public class SessionManager {
 	{
 		String deviceIndex = deviceuid.split("\\.")[2];
 		String serialno = deviceuid.split("\\.")[0];
+		try{
 		for(Entry<Long ,IoSession> entry : sessionMap.entrySet())
 		{
 			if(entry.getValue().getAttribute("deviceuid").toString().equals(serialno))
 			{
-				if ( entry.getValue().getAttribute(deviceuid + ".paras") == null ){
-					log.info("设备 " + serialno + " 有网络延迟情况 ，放弃参数设置") ;
-					return -1 ;
-				}
+//				for ( Object obj : entry.getValue().getAttributeKeys()) 
+//				{
+//					log.info("Session keys:" + obj);
+//					
+//					log.info("Values : " + entry.getValue().getAttribute(obj));
+//				}
+//				if ( entry.getValue().getAttribute(deviceuid + ".paras") == null ){
+//					log.info("设备 " + serialno + " 有网络延迟情况 ，放弃参数设置") ;
+//					return -1 ;
+//				}
 				entry.getValue().setAttribute("restart" ,restart) ;
 					
 				if ( log.isDebugEnabled())
@@ -99,8 +107,12 @@ public class SessionManager {
 				entry.getValue().write("MOID 104." + deviceIndex + ".12 " + MessageFactory.makeDevice104ParameterMessage(cluid, clname, JSON.parseObject(entry.getValue().getAttribute(deviceuid + ".paras").toString()) )+ "\n") ;
 				break ;
 			}
-			
 		}
+		}catch (Exception e)
+		{
+			return -1 ;
+		}
+		
 		return 0 ;
 	}
 	/**
