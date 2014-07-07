@@ -73,10 +73,10 @@ public class MessageFactory {
 			paras.getJSONObject("auto_control").put("type", "shijianwendu");
 			
 		}
-		if (log.isDebugEnabled())
-		{
-			log.debug(JSON.toJSONString(paras));
-		}
+		//if (log.isDebugEnabled())
+	//	{
+			log.info(" 准备下发报文 ： " + JSON.toJSONString(paras));
+		//}
 		return JSON.toJSONString(paras);
 	}
 	

@@ -140,6 +140,7 @@ public class MCE109CommandAction extends MCECommandAction  {
 			//读901设备参数
 			session.write("MOID 901.1.2\n") ;
 			// 读取104设备参数  。设备每次连接后 都把设备参数读过来放到session对象里
+			Thread.sleep(20000);
 			List list = db.execueQueryReturnMore(ModelSql.get104Device(deviceserialno), null);
 			int j = 1 ;
 			for ( int i = 0 ; i < list.size() ; i++)

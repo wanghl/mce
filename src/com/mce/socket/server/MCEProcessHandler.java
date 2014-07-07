@@ -46,6 +46,14 @@ public class MCEProcessHandler extends IoHandlerAdapter {
 			JSONParser jsonparser = new JSONParser();
 			// deviceuid put to session
 			String oid = jsonobject.getString("oid");
+//			if (oid.startsWith("104"))
+//			{
+//				if ( session.getAttribute("deviceuid") == null || session.getAttribute("deviceuid").equals("") )
+//				{
+//					session.write("MOID 901.1.109\n");
+//					return ;
+//				}
+//			}
 			if ( ! oid.equals("901.1.2") && ! oid.equals("901.1.12") && ! oid.startsWith("104"))
 			{
 				if (oid.equals("901.1.109") || session.getAttribute("deviceuid").equals("")) {

@@ -1,14 +1,8 @@
 package com.mce.socket.server;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,15 +15,16 @@ import org.apache.mina.core.session.IoSession;
 
 import com.alibaba.fastjson.JSON;
 import com.mce.action.SystemConfiguration;
-import com.mce.db.operate.DatabaseOperator;
-import com.mce.json.parser.ModelSql;
-import com.mce.uitl.MCECommand;
 import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MessageFactory;
+import com.mce.uitl.StoreMessageUtil;
 
 public class SessionManager {
 	private final static Logger log = Logger.getLogger(SessionManager.class);
 	private static Map<Long, IoSession> sessionMap = new ConcurrentHashMap <Long, IoSession>() ;
+	private static Map<String, String> ktconfigMap = new ConcurrentHashMap <String, String>() ;
+	
+	
 	private static IoAcceptor currentAcceptor = null;
 	private static final String QUERY_STATUS = "MOID 901.1.103\n" ;
 	public static void initialize(IoAcceptor acceptor)
@@ -38,6 +33,23 @@ public class SessionManager {
 		currentAcceptor = acceptor ;
 	}
 	
+	//  设置空调参数  
+	public static void setKtConfig( String deviceuid ,String configstr)
+	{
+		log.info("已收到空调配置 ： 设备序列号" + deviceuid + " 配置   " + configstr);
+		
+		ktconfigMap.put(deviceuid, configstr) ;
+	}
+	
+	public static String getKtConfig(String deviceuid)
+	{
+		log.info("当前空调配置");
+		for(Entry<String ,String> entry : ktconfigMap.entrySet())
+		{
+			log.info("键 名： " + entry.getKey() );
+		}
+		return ktconfigMap.get(deviceuid) ;
+	}
 	/**
 	 * 向指定序列号的设备发送命令
 	 * @param deviceuid
@@ -79,7 +91,7 @@ public class SessionManager {
 		return null ;
 	}
 	
-	public static Integer setDevice104Parameter(String deviceuid ,String cluid ,String clname ,Boolean restart)
+	public static Integer setDevice104Parameter(String deviceuid ,String cluid ,String clname ,Boolean restart )
 	{
 		String deviceIndex = deviceuid.split("\\.")[2];
 		String serialno = deviceuid.split("\\.")[0];
@@ -100,16 +112,35 @@ public class SessionManager {
 //				}
 				entry.getValue().setAttribute("restart" ,restart) ;
 					
-				if ( log.isDebugEnabled())
+			/*	if ( log.isDebugEnabled())
 				{
 					log.debug("发送命令 ： " +"MOID 104." + deviceIndex + ".12 " + MessageFactory.makeDevice104ParameterMessage(cluid, clname, JSON.parseObject(entry.getValue().getAttribute(deviceuid + ".paras").toString()) )+ "\n");
 				}
 				entry.getValue().write("MOID 104." + deviceIndex + ".12 " + MessageFactory.makeDevice104ParameterMessage(cluid, clname, JSON.parseObject(entry.getValue().getAttribute(deviceuid + ".paras").toString()) )+ "\n") ;
+				break ;*/
+				
+				if ( log.isDebugEnabled())
+				{
+					log.debug("发送命令 ： " +"MOID 104." + deviceIndex + ".12 " + MessageFactory.makeDevice104ParameterMessage(cluid, clname, JSON.parseObject( SessionManager.getKtConfig(serialno) ) )+ "\n");
+				}
+				if ( getKtConfig( serialno + ".104." + deviceIndex + ".paras" )  == null 
+						|| getKtConfig( serialno + ".104." + deviceIndex + ".paras" ).equals(""))
+				{
+					return -2;
+				}
+				log.info(serialno + " 设备空调配置： " + SessionManager.getKtConfig(serialno + ".104." + deviceIndex + ".paras"));
+				String cmdmsg = MessageFactory.makeDevice104ParameterMessage(cluid, clname, JSON.parseObject(  SessionManager.getKtConfig( serialno + ".104." + deviceIndex + ".paras" )  ) );
+				log.info("发送命令 ： " +"MOID 104." + deviceIndex + ".12 " + cmdmsg + "\n");
+
+				entry.getValue().write("MOID 104." + deviceIndex + ".12 " + cmdmsg + "\n") ;
 				break ;
+				
 			}
 		}
 		}catch (Exception e)
 		{
+			log.error(e);
+			e.printStackTrace(); 
 			return -1 ;
 		}
 		
@@ -156,6 +187,12 @@ public class SessionManager {
 					log.info("发送状态查询命令终止! 设备序列号: " + entry.getValue().getAttribute("deviceuid"));
 					log.info("session信息: " + entry.getValue()) ;
 					log.info("原因: 上一状态查询指令未收到返回报文") ;
+					try {
+						StoreMessageUtil.storeMessage2LogFile(entry.getValue(), "上一状态查询指令未收到返回报文。暂不发送103命令" );
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 				if ( SystemConfiguration.getProperty("closemode").equals("0"))
 				{

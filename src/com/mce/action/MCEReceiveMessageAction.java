@@ -1,10 +1,13 @@
 package com.mce.action;
 
+import java.net.InetSocketAddress;
+
 import org.apache.log4j.Logger;
 import org.apache.mina.core.session.IoSession;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.mce.socket.server.SessionManager;
 import com.mce.uitl.MCECommand;
 
 public class MCEReceiveMessageAction extends MCECommandAction{
@@ -24,9 +27,11 @@ public class MCEReceiveMessageAction extends MCECommandAction{
 			if(oid.startsWith("104"))
 			{
 				String key = session.getAttribute("deviceuid").toString() + ".104." + oid.split("\\.")[1] ;
-				session.setAttribute(key +".errno" ,jsonobject.getString("errno")) ;
-				session.setAttribute(key + ".errstr" ,jsonobject.getString("errstr")) ;
-				
+				//session.setAttribute(key +".errno" ,jsonobject.getString("errno")) ;
+				//session.setAttribute(key + ".errstr" ,jsonobject.getString("errstr")) ;
+
+				SessionManager.setKtConfig(key +".errno" ,jsonobject.getString("errno"));
+				SessionManager.setKtConfig(key + ".errstr",jsonobject.getString("errstr"));
 				if( jsonobject.getInteger("errno") == 0)
 				{
 					log.info("空调参数设置成功！ MCE 序列号： " + session.getAttribute("deviceuid"));
@@ -69,9 +74,13 @@ public class MCEReceiveMessageAction extends MCECommandAction{
 			{
 				if (errno == 0)
 				{
+					/////  改为使用IP+端口的形式作为空调参数设置的返回值  
 					//读取104设备的返回值放到session中 。key为设备序列号.104.数字标识
 					String key = session.getAttribute("deviceuid").toString() + ".104." + oid.split("\\.")[1] + ".paras" ;
-					session.setAttribute(key , message);
+					//session.setAttribute(key , message);
+
+					SessionManager.setKtConfig(key, message);
+					
 					log.info("读取空调控制器参数成功！ MCE序列号：" + session.getAttribute("deviceuid")) ;
 				}
 				else

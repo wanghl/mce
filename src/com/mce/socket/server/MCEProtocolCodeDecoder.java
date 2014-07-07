@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.mce.action.SystemConfiguration;
 import com.mce.uitl.MCEStatus;
 import com.mce.uitl.MCEUtil;
+import com.mce.uitl.StoreMessageUtil;
 
 public class MCEProtocolCodeDecoder extends CumulativeProtocolDecoder {
 	Logger log = Logger.getLogger(MCEProtocolCodeDecoder.class);
@@ -33,7 +34,7 @@ public class MCEProtocolCodeDecoder extends CumulativeProtocolDecoder {
 		while (iobuffer.hasRemaining())
 		{
 			receive = iobuffer.getString(decoder) ;
-	
+			StoreMessageUtil.storeMessage2LogFile(iosession, receive);
 			if (log.isDebugEnabled())
 			{
 				log.debug("已缓存报文：" + iosession.getAttribute("jsonstring")); 
@@ -83,6 +84,23 @@ public class MCEProtocolCodeDecoder extends CumulativeProtocolDecoder {
 		{
 			log.debug("报文收取成功 ，内容：" + tmpstr + " 开始校验报文合法性....") ;
 		}
+		
+		StoreMessageUtil.storeMessage2LogFile(iosession, "报文组合完成：" + tmpstr);
+		
+		try{
+			if ( iosession.getAttribute("receivesuccess") == null )
+			{
+				iosession.setAttribute("receivesuccess" , 0 ) ;
+				
+			}
+			else
+			{
+				iosession.setAttribute("receivesuccess" , Integer.parseInt( iosession.getAttribute("receivesuccess").toString() ) ) ;
+			}
+			}catch (Exception e)
+			{
+				e.printStackTrace(); 
+			}
 		
 		//  校验报文合法性。 主要检查是否新加了设备。如果新加了设备而没创建对于的表，后续处理会报错。
 		//  现改为：对于新加设备未加对应数据库表的情况　，放弃新设备信息的处理。

@@ -31,15 +31,15 @@ public class SendSMSAction {
 	public static void sendMessage(String numberList, String content)
 	{
 		DatabaseOperator db = new DatabaseOperator() ;
-		String messgaeTitle = SystemConfiguration.getProperty("messagetitle").toString();
-		if ( messgaeTitle.contains(":"))
-		{
-			content = messgaeTitle.replace("(.*)", " " + content) ;
-		}
-		else
-		{
-			content = messgaeTitle.replace("(.*)", ": " + content) ;
-		}
+//		String messgaeTitle = SystemConfiguration.getProperty("messagetitle").toString();
+//		if ( messgaeTitle.contains(":"))
+//		{
+//			content = messgaeTitle.replace("(.*)", " " + content) ;
+//		}
+//		else
+//		{
+//			content = messgaeTitle.replace("(.*)", ": " + content) ;
+//		}
 	//	content = SystemConfiguration.getProperty("messagetitle").toString().replace("(.*)", content) ;
 		try {
 			HttpClient client = new HttpClient();
@@ -124,8 +124,13 @@ public class SendSMSAction {
 	
 	public static void main(String[] argvs)
 	{
-		SystemConfiguration.reload() ;
-		SendSMSAction.sendMessage("18647132049", "测试看行不行") ;
+		String s = "ECS环境控制系统提示您：设备告警: @1 。序列号 ：@2 ，环控点名称：@3 ，谢谢！"; 
+		s = s.replace("@1", "nb1");
+		s = s.replace("@2", "nb2");
+		s = s.replace("@3", "nb3");
+		//System.out.println(s);
+		//SystemConfiguration.reload() ;
+		SendSMSAction.sendMessage("18647132049", s) ;
 	}
 
 }

@@ -328,21 +328,27 @@ public class MCECommandAction implements IMCECommandAction{
 		{
 			Map position = db.execueQuery(ModelSql.getPositionBySerialNoSql(), new Object[]{deviceserialno}) ;
 			String telNumber ="" ;
-			List<Map> lm = db.execueQueryReturnMore(ModelSql.getUserMobile(), new Object[]{position.get("objuid")}) ;
-			if ( lm.isEmpty() )
-				return ;
-			for (int i = 0 ; i < lm.size() ; i++)
-			{
-				if ( lm.get(i) != null && lm.get(i).toString().length() > 0)
-				{
-					telNumber = telNumber+ lm.get(i).get("mobile") + "," ;
-				}
-			}
-			telNumber = telNumber.substring(0 ,telNumber.length() -1) ;
+//			List<Map> lm = db.execueQueryReturnMore(ModelSql.getUserMobile(), new Object[]{position.get("objuid")}) ;
+//			if ( lm.isEmpty() )
+//				return ;
+//			for (int i = 0 ; i < lm.size() ; i++)
+//			{
+//				if ( lm.get(i) != null && lm.get(i).toString().length() > 0)
+//				{
+//					telNumber = telNumber+ lm.get(i).get("mobile") + "," ;
+//				}
+//			}
+//			telNumber = telNumber.substring(0 ,telNumber.length() -1) ;
 			
+			telNumber = SystemConfiguration.getProperty("alarmsendnumber").toString() ;
 			Map alarmDesc = db.execueQuery(ModelSql.getAlarmDescBycode(), new Object[]{alarmType}) ;
 			
-			String message = "设备告警: " + alarmType + " " + alarmDesc.get("alarmdesc") + " 。序列号 ：" + position.get("positionid") + " ,环控点名称：" + position.get("positiondesc") + ".告警时间" + MCEUtil.getCurrentDateZH(updatetime);
+		//	String message = "设备告警: " + alarmType + " " + alarmDesc.get("alarmdesc") + " 。序列号 ：" + position.get("positionid") + " ,环控点名称：" + position.get("positiondesc") + ".告警时间" + MCEUtil.getCurrentDateZH(updatetime);
+			String message = SystemConfiguration.getProperty("messagetitle").toString();
+			message = message.replace("@1", alarmType + " " + alarmDesc.get("alarmdesc"));
+			message = message.replace("@2", position.get("positionid").toString());
+			message = message.replace("@3", position.get("positiondesc")+ ".告警时间 " + MCEUtil.getCurrentDateZH(updatetime));
+			//String message = "ECS环境控制系统提示您：设备告警: "+ alarmType + " " + alarmDesc.get("alarmdesc") +" 。序列号 ："+ position.get("positionid") +" ，环控点名称："+ position.get("positiondesc")+ ".告警时间 " + MCEUtil.getCurrentDateZH(updatetime)+" ，谢谢！";
 			log.info("准备发送告警短信 ，接收号码：" + telNumber + " 短信内容： " + message ) ;
 			SendSMSAction.sendMessage(telNumber, message) ;
 			
@@ -358,7 +364,7 @@ public class MCECommandAction implements IMCECommandAction{
 	{
 		SystemConfiguration.loadProperty() ;
 		MCECommandAction m = new MCECommandAction() ;
-		m.sendAlarmSMS("13990005",  "103113" ,new Date().getTime()) ;
+		m.sendAlarmSMS("13990022",  "103113" ,new Date().getTime()) ;
 		
 	}
 	
